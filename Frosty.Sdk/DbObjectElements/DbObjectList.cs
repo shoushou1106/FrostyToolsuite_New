@@ -1,5 +1,6 @@
-﻿using System.Collections;
-
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using Frosty.Sdk.IO;
 using Frosty.Sdk.Utils;
 
@@ -7,48 +8,29 @@ namespace Frosty.Sdk.DbObjectElements;
 
 public class DbObjectList : DbObject, IEnumerable<DbObject>
 {
-    private readonly List<DbObject> _items;
+    public int Count => m_items.Count;
+
+    private readonly List<DbObject> m_items;
 
     protected internal DbObjectList(Type inType)
         : base(inType)
     {
-        _items = [];
+        m_items = new List<DbObject>();
     }
 
-    protected internal DbObjectList(int inCapacity)
+    protected internal  DbObjectList(int inCapacity)
         : base(Type.List | Type.Anonymous)
     {
-        _items = new List<DbObject>(inCapacity);
+        m_items = new List<DbObject>(inCapacity);
     }
 
-    protected internal DbObjectList(string inName, int inCapacity)
+    protected internal  DbObjectList(string inName, int inCapacity)
         : base(Type.List, inName)
     {
-        _items = new List<DbObject>(inCapacity);
+        m_items = new List<DbObject>(inCapacity);
     }
 
-    public int Count => _items.Count;
-
-    public DbObject this[int index]
-    {
-        get => _items[index];
-        set => _items[index] = value;
-    }
-
-    public IEnumerator<DbObject> GetEnumerator()
-    {
-        return new DbObjectListEnum(_items);
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
-
-    public override bool IsList()
-    {
-        return true;
-    }
+    public override bool IsList() => true;
 
     public override DbObjectList AsList()
     {
@@ -57,75 +39,81 @@ public class DbObjectList : DbObject, IEnumerable<DbObject>
 
     public void Add(DbObjectDict value)
     {
-        _items.Add(value);
+        m_items.Add(value);
     }
 
     public void Add(DbObjectList value)
     {
-        _items.Add(value);
+        m_items.Add(value);
     }
 
     public void Add(bool value)
     {
-        _items.Add(new DbObjectBool(value));
+        m_items.Add(new DbObjectBool(value));
     }
 
     public void Add(string value)
     {
-        _items.Add(new DbObjectString(value));
+        m_items.Add(new DbObjectString(value));
     }
 
     public void Add(int value)
     {
-        _items.Add(new DbObjectInt(value));
+        m_items.Add(new DbObjectInt(value));
     }
 
     public void Add(uint value)
     {
-        _items.Add(new DbObjectInt((int)value));
+        m_items.Add(new DbObjectInt((int)value));
     }
 
     public void Add(long value)
     {
-        _items.Add(new DbObjectLong(value));
+        m_items.Add(new DbObjectLong(value));
     }
 
     public void Add(ulong value)
     {
-        _items.Add(new DbObjectLong((long)value));
+        m_items.Add(new DbObjectLong((long)value));
     }
 
     public void Add(float value)
     {
-        _items.Add(new DbObjectFloat(value));
+        m_items.Add(new DbObjectFloat(value));
     }
 
     public void Add(double value)
     {
-        _items.Add(new DbObjectDouble(value));
+        m_items.Add(new DbObjectDouble(value));
     }
 
     public void Add(Guid value)
     {
-        _items.Add(new DbObjectGuid(value));
+        m_items.Add(new DbObjectGuid(value));
     }
 
     public void Add(Sha1 value)
     {
-        _items.Add(new DbObjectSha1(value));
+        m_items.Add(new DbObjectSha1(value));
     }
 
     public void Add(byte[] value)
     {
-        _items.Add(new DbObjectBlob(value));
+        m_items.Add(new DbObjectBlob(value));
     }
 
-    protected override void InternalSerialize(DataStream? stream)
+    public DbObject this[int index]
+    {
+        get => m_items[index];
+        set => m_items[index] = value;
+    }
+
+    protected override void InternalSerialize(DataStream stream)
     {
         Block<byte> sub = new(0);
         using (BlockStream subStream = new(sub, true))
         {
-            foreach (DbObject value in _items)
+            foreach (DbObject value in m_items)
             {
                 Serialize(subStream, value);
             }
@@ -134,14 +122,14 @@ public class DbObjectList : DbObject, IEnumerable<DbObject>
             subStream.WriteByte((byte)Type.Null);
         }
 
-        stream?.Write7BitEncodedInt64(sub.Size);
-        stream?.Write(sub);
+        stream.Write7BitEncodedInt64(sub.Size);
+        stream.Write(sub);
         sub.Dispose();
     }
 
-    protected override void InternalDeserialize(DataStream? stream)
+    protected override void InternalDeserialize(DataStream stream)
     {
-        stream?.Read7BitEncodedInt64();
+        stream.Read7BitEncodedInt64();
         while (true)
         {
             DbObject? obj = Deserialize(stream);
@@ -151,25 +139,32 @@ public class DbObjectList : DbObject, IEnumerable<DbObject>
                 break;
             }
 
-            _items.Add(obj);
+            m_items.Add(obj);
         }
     }
 
-    private class DbObjectListEnum(List<DbObject> inItems) : IEnumerator<DbObject>
+    private class DbObjectListEnum : IEnumerator<DbObject>
     {
+        private List<DbObject> m_items;
+
         // Enumerators are positioned before the first element
         // until the first MoveNext() call.
-        private int _position = -1;
+        private int m_position = -1;
+
+        public DbObjectListEnum(List<DbObject> inItems)
+        {
+            m_items = inItems;
+        }
 
         public bool MoveNext()
         {
-            _position++;
-            return _position < inItems.Count;
+            m_position++;
+            return m_position < m_items.Count;
         }
 
         public void Reset()
         {
-            _position = -1;
+            m_position = -1;
         }
 
         object IEnumerator.Current => Current;
@@ -180,7 +175,7 @@ public class DbObjectList : DbObject, IEnumerable<DbObject>
             {
                 try
                 {
-                    return inItems[_position];
+                    return m_items[m_position];
                 }
                 catch (IndexOutOfRangeException)
                 {
@@ -192,5 +187,15 @@ public class DbObjectList : DbObject, IEnumerable<DbObject>
         public void Dispose()
         {
         }
+    }
+
+    public IEnumerator<DbObject> GetEnumerator()
+    {
+        return new DbObjectListEnum(m_items);
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

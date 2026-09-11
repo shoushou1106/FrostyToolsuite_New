@@ -1,53 +1,50 @@
-﻿using Frosty.Sdk.IO;
+﻿using System;
+using Frosty.Sdk.IO;
 
 namespace Frosty.Sdk.DbObjectElements;
 
 public class DbObjectBlob : DbObject
 {
-    private byte[] _value;
+    private byte[] m_value;
 
     protected internal DbObjectBlob(Type inType)
         : base(inType)
     {
-        _value = [];
+        m_value = Array.Empty<byte>();
     }
 
     public DbObjectBlob(byte[] inValue)
         : base(Type.Blob | Type.Anonymous)
     {
-        _value = inValue;
+        m_value = inValue;
     }
 
     public DbObjectBlob(string inName, byte[] inValue)
         : base(Type.Blob, inName)
     {
-        _value = inValue;
+        m_value = inValue;
     }
 
     public override byte[] AsBlob()
     {
-        return _value;
+        return m_value;
     }
 
-    protected override void InternalSerialize(DataStream? stream)
+    protected override void InternalSerialize(DataStream stream)
     {
-        stream?.Write7BitEncodedInt32(_value.Length);
-        stream?.Write(_value);
+        stream.Write7BitEncodedInt32(m_value.Length);
+        stream.Write(m_value);
     }
 
-    protected override void InternalDeserialize(DataStream? stream)
+    protected override void InternalDeserialize(DataStream stream)
     {
-        if (stream is null)
-        {
-            return;
-        }
-
-        _value = new byte[stream.Read7BitEncodedInt32()];
-        stream.ReadExactly(_value);
+        int length = stream.Read7BitEncodedInt32();
+        m_value = new byte[length];
+        stream.ReadExactly(m_value);
     }
 
     public override string? ToString()
     {
-        return _value.ToString();
+        return m_value.ToString();
     }
 }

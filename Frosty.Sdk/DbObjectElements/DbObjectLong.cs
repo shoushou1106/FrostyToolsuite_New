@@ -1,12 +1,10 @@
-﻿using System.Globalization;
-
-using Frosty.Sdk.IO;
+﻿using Frosty.Sdk.IO;
 
 namespace Frosty.Sdk.DbObjectElements;
 
 public class DbObjectLong : DbObject
 {
-    private long _value;
+    private long m_value;
 
     protected internal DbObjectLong(Type inType)
         : base(inType)
@@ -16,52 +14,47 @@ public class DbObjectLong : DbObject
     public DbObjectLong(long inValue)
         : base(Type.Long | Type.Anonymous)
     {
-        _value = inValue;
+        m_value = inValue;
     }
 
     public DbObjectLong(string inName, long inValue)
         : base(Type.Long, inName)
     {
-        _value = inValue;
+        m_value = inValue;
     }
 
     public override int AsInt()
     {
-        return (int)_value;
+        return (int)m_value;
     }
 
     public override uint AsUInt()
     {
-        return (uint)_value;
+        return (uint)m_value;
     }
 
     public override long AsLong()
     {
-        return _value;
+        return m_value;
     }
 
     public override ulong AsULong()
     {
-        return (ulong)_value;
+        return (ulong)m_value;
     }
 
-    protected override void InternalSerialize(DataStream? stream)
+    protected override void InternalSerialize(DataStream stream)
     {
-        stream?.WriteInt64(_value);
+        stream.WriteInt64(m_value);
     }
 
-    protected override void InternalDeserialize(DataStream? stream)
+    protected override void InternalDeserialize(DataStream stream)
     {
-        if (stream is null)
-        {
-            return;
-        }
-
-        _value = stream.ReadInt64();
+        m_value = stream.ReadInt64();
     }
 
-    public override string ToString()
+    public override string? ToString()
     {
-        return _value.ToString(CultureInfo.InvariantCulture);
+        return m_value.ToString();
     }
 }

@@ -4,48 +4,43 @@ namespace Frosty.Sdk.DbObjectElements;
 
 public class DbObjectString : DbObject
 {
-    private string _value;
+    private string m_value;
 
     protected internal DbObjectString(Type inType)
         : base(inType)
     {
-        _value = string.Empty;
+        m_value = string.Empty;
     }
 
     public DbObjectString(string inValue)
         : base(Type.String | Type.Anonymous)
     {
-        _value = inValue;
+        m_value = inValue;
     }
 
     public DbObjectString(string inName, string inValue)
         : base(Type.String, inName)
     {
-        _value = inValue;
+        m_value = inValue;
     }
 
     public override string AsString()
     {
-        return _value;
+        return m_value;
     }
 
-    protected override void InternalSerialize(DataStream? stream)
+    protected override void InternalSerialize(DataStream stream)
     {
-        stream?.WriteSizedString(_value);
+        stream.WriteSizedString(m_value);
     }
 
-    protected override void InternalDeserialize(DataStream? stream)
+    protected override void InternalDeserialize(DataStream stream)
     {
-        if (stream is null)
-        {
-            return;
-        }
-
-        _value = stream.ReadSizedString();
+        m_value = stream.ReadSizedString();
     }
 
-    public override string ToString()
+    public override string? ToString()
     {
-        return _value;
+        return m_value;
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System.Globalization;
-
 using Frosty.Sdk.IO;
 
 namespace Frosty.Sdk.DbObjectElements;
 
 public class DbObjectDouble : DbObject
 {
-    private double _value;
+    private double m_value;
 
     protected internal DbObjectDouble(Type inType)
         : base(inType)
@@ -16,42 +15,37 @@ public class DbObjectDouble : DbObject
     public DbObjectDouble(double inValue)
         : base(Type.Double | Type.Anonymous)
     {
-        _value = inValue;
+        m_value = inValue;
     }
 
     public DbObjectDouble(string inName, double inValue)
         : base(Type.Double, inName)
     {
-        _value = inValue;
+        m_value = inValue;
     }
 
     public override float AsFloat()
     {
-        return (float)_value;
+        return (float)m_value;
     }
 
     public override double AsDouble()
     {
-        return _value;
+        return m_value;
     }
 
-    protected override void InternalSerialize(DataStream? stream)
+    protected override void InternalSerialize(DataStream stream)
     {
-        stream?.WriteDouble(_value);
+        stream.WriteDouble(m_value);
     }
 
-    protected override void InternalDeserialize(DataStream? stream)
+    protected override void InternalDeserialize(DataStream stream)
     {
-        if (stream is null)
-        {
-            return;
-        }
-
-        _value = stream.ReadDouble();
+        m_value = stream.ReadDouble();
     }
 
-    public override string ToString()
+    public override string? ToString()
     {
-        return _value.ToString(CultureInfo.CurrentCulture);
+        return m_value.ToString(CultureInfo.CurrentCulture);
     }
 }
