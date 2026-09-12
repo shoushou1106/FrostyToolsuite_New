@@ -19,12 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Frosty.Sdk\Frosty.Sdk.csproj"/>
+    <ProjectReference Include="../Frosty.Sdk/Frosty.Sdk.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="TestData\original_huffman" LogicalName="Frosty.Sdk.Tests.TestData.original_huffman"/>
-    <EmbeddedResource Include="TestData\new_huffman" LogicalName="Frosty.Sdk.Tests.TestData.new_huffman"/>
+    <EmbeddedResource Include="TestData/original_huffman" LogicalName="Frosty.Sdk.Tests.TestData.original_huffman"/>
+    <EmbeddedResource Include="TestData/new_huffman" LogicalName="Frosty.Sdk.Tests.TestData.new_huffman"/>
   </ItemGroup>
 
   <ItemGroup>

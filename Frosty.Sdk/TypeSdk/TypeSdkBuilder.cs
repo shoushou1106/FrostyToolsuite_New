@@ -389,9 +389,9 @@ public class TypeSdkBuilder
 
         List<AdditionalText> meta = new();
 
-        if (Directory.Exists("Meta"))
+        if (Directory.Exists("TypeSdkMeta"))
         {
-            foreach (string additionalTextPath in Directory.EnumerateFiles("Meta"))
+            foreach (string additionalTextPath in Directory.EnumerateFiles("TypeSdkMeta"))
             {
                 meta.Add(new CustomAdditionalText(additionalTextPath));
             }

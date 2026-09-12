@@ -21,13 +21,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="ThirdParty\*"/>
-    <Content Include="ThirdParty\*" CopyToOutputDirectory="PreserveNewest"/>
+    <None Remove="ThirdParty/*"/>
+    <Content Include="ThirdParty/*" CopyToOutputDirectory="PreserveNewest"/>
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="TypeSdk\Meta\**\*.cs"/>
-    <Content Include="TypeSdk\Meta\**\*.cs" LinkBase="Meta\"
+    <Compile Remove="TypeSdk/Meta/**/*.cs"/>
+    <Content Include="TypeSdk/Meta/**/*.cs"
+             Link="TypeSdkMeta/%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest"/>
   </ItemGroup>
 
