@@ -4,43 +4,55 @@ namespace Frosty.Sdk.DbObjectElements;
 
 public class DbObjectString : DbObject
 {
-    private string m_value;
+    private string _value;
 
     protected internal DbObjectString(Type inType)
         : base(inType)
     {
-        m_value = string.Empty;
+        _value = string.Empty;
     }
 
     public DbObjectString(string inValue)
         : base(Type.String | Type.Anonymous)
     {
-        m_value = inValue;
+        _value = inValue;
     }
 
     public DbObjectString(string inName, string inValue)
         : base(Type.String, inName)
     {
-        m_value = inValue;
+        _value = inValue;
     }
 
     public override string AsString()
     {
-        return m_value;
+        return _value;
     }
 
-    protected override void InternalSerialize(DataStream stream)
+    protected override void InternalSerialize(DataStream? stream)
     {
-        stream.WriteSizedString(m_value);
+        // TODO: Null check decision pending on throw or ignore.
+        if (stream is null)
+        {
+            throw new NotImplementedException("TODO: Null check decision pending on throw or ignore.");
+        }
+
+        stream.WriteSizedString(_value);
     }
 
-    protected override void InternalDeserialize(DataStream stream)
+    protected override void InternalDeserialize(DataStream? stream)
     {
-        m_value = stream.ReadSizedString();
+        // TODO: Null check decision pending on throw or ignore.
+        if (stream is null)
+        {
+            throw new NotImplementedException("TODO: Null check decision pending on throw or ignore.");
+        }
+
+        _value = stream.ReadSizedString();
     }
 
-    public override string? ToString()
+    public override string ToString()
     {
-        return m_value;
+        return _value;
     }
 }

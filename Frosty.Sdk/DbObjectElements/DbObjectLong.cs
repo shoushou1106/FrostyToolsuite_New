@@ -1,10 +1,12 @@
-﻿using Frosty.Sdk.IO;
+﻿using System.Globalization;
+
+using Frosty.Sdk.IO;
 
 namespace Frosty.Sdk.DbObjectElements;
 
 public class DbObjectLong : DbObject
 {
-    private long m_value;
+    private long _value;
 
     protected internal DbObjectLong(Type inType)
         : base(inType)
@@ -14,47 +16,59 @@ public class DbObjectLong : DbObject
     public DbObjectLong(long inValue)
         : base(Type.Long | Type.Anonymous)
     {
-        m_value = inValue;
+        _value = inValue;
     }
 
     public DbObjectLong(string inName, long inValue)
         : base(Type.Long, inName)
     {
-        m_value = inValue;
+        _value = inValue;
     }
 
     public override int AsInt()
     {
-        return (int)m_value;
+        return (int)_value;
     }
 
     public override uint AsUInt()
     {
-        return (uint)m_value;
+        return (uint)_value;
     }
 
     public override long AsLong()
     {
-        return m_value;
+        return _value;
     }
 
     public override ulong AsULong()
     {
-        return (ulong)m_value;
+        return (ulong)_value;
     }
 
-    protected override void InternalSerialize(DataStream stream)
+    protected override void InternalSerialize(DataStream? stream)
     {
-        stream.WriteInt64(m_value);
+        // TODO: Null check decision pending on throw or ignore.
+        if (stream is null)
+        {
+            throw new NotImplementedException("TODO: Null check decision pending on throw or ignore.");
+        }
+
+        stream.WriteInt64(_value);
     }
 
-    protected override void InternalDeserialize(DataStream stream)
+    protected override void InternalDeserialize(DataStream? stream)
     {
-        m_value = stream.ReadInt64();
+        // TODO: Null check decision pending on throw or ignore.
+        if (stream is null)
+        {
+            throw new NotImplementedException("TODO: Null check decision pending on throw or ignore.");
+        }
+
+        _value = stream.ReadInt64();
     }
 
-    public override string? ToString()
+    public override string ToString()
     {
-        return m_value.ToString();
+        return _value.ToString(CultureInfo.InvariantCulture);
     }
 }
