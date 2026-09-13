@@ -1,68 +1,66 @@
-using System;
-
 namespace Frosty.Sdk.Ebx;
 
 public readonly struct AssetClassGuid : IEquatable<AssetClassGuid>
 {
-    public Guid ExportedGuid => m_exportedGuid;
-    public int InternalId => m_internalId;
-    public bool IsExported => m_isExported;
-
-    private readonly Guid m_exportedGuid;
-    private readonly int m_internalId;
-    private readonly bool m_isExported;
+    public Guid ExportedGuid { get; }
+    public int InternalId { get; }
+    public bool IsExported { get; }
 
     public AssetClassGuid(Guid inGuid, int inId)
     {
-        m_exportedGuid = inGuid;
-        m_internalId = inId;
-        m_isExported = (inGuid != Guid.Empty);
+        ExportedGuid = inGuid;
+        InternalId = inId;
+        IsExported = inGuid != Guid.Empty;
     }
 
     public AssetClassGuid(int inId)
     {
-        m_exportedGuid = Guid.Empty;
-        m_internalId = inId;
-        m_isExported = false;
+        ExportedGuid = Guid.Empty;
+        InternalId = inId;
+        IsExported = false;
     }
 
-    public static bool operator ==(AssetClassGuid a, object b) => a.Equals(b);
+    public static bool operator ==(AssetClassGuid a, object? b)
+    {
+        return a.Equals(b);
+    }
 
-    public static bool operator !=(AssetClassGuid a, object b) => !a.Equals(b);
+    public static bool operator !=(AssetClassGuid a, object? b)
+    {
+        return !a.Equals(b);
+    }
 
     public override bool Equals(object? obj)
     {
-        switch (obj)
+        return obj switch
         {
-            case null:
-                return false;
-            case AssetClassGuid reference:
-                return Equals(reference);
-            case Guid guid:
-                return m_isExported && guid == m_exportedGuid;
-            case int id:
-                return m_internalId == id;
-            default:
-                return false;
-        }
+            AssetClassGuid reference => Equals(reference),
+            Guid guid => IsExported && guid == ExportedGuid,
+            int id => InternalId == id,
+            _ => false
+        };
     }
-
 
     public bool Equals(AssetClassGuid other)
     {
-        return m_exportedGuid.Equals(other.m_exportedGuid) && m_internalId == other.m_internalId && m_isExported == other.m_isExported;
+        return ExportedGuid.Equals(other.ExportedGuid) && InternalId == other.InternalId &&
+               IsExported == other.IsExported;
     }
+
     public override int GetHashCode()
     {
         unchecked
         {
             int hash = (int)2166136261;
-            hash = (hash * 16777619) ^ m_exportedGuid.GetHashCode();
-            hash = (hash * 16777619) ^ m_internalId.GetHashCode();
-            hash = (hash * 16777619) ^ m_isExported.GetHashCode();
+            hash = (hash * 16777619) ^ ExportedGuid.GetHashCode();
+            hash = (hash * 16777619) ^ InternalId.GetHashCode();
+            hash = (hash * 16777619) ^ IsExported.GetHashCode();
             return hash;
         }
     }
 
-    public override string ToString() => m_isExported ? m_exportedGuid.ToString() : $"00000000-0000-0000-0000-{m_internalId:x12}";
+    public override string ToString()
+    {
+        return IsExported ? ExportedGuid.ToString() : $"00000000-0000-0000-0000-{InternalId:x12}";
+    }
 }

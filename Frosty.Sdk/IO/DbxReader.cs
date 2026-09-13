@@ -202,7 +202,7 @@ public sealed class DbxReader
         Guid partitionGuid = Guid.Parse(GetAttributeValue(partitionNode, "guid")!);
         m_primaryInstGuid = Guid.Parse(GetAttributeValue(partitionNode, "primaryInstance")!);
 
-        m_ebx!.partitionGuid = partitionGuid;
+        m_ebx!.PartitionGuid = partitionGuid;
 
         foreach(XmlNode child in partitionNode.ChildNodes)
         {
@@ -215,7 +215,7 @@ public sealed class DbxReader
             ParseInstance(kvp.Value.dbxInstance, kvp.Value.ebxInstance, kvp.Key);
         }
 
-        m_ebx!.refCounts = m_guidToRefCount.Values.ToList();
+        m_ebx!.InternalRefCounts = m_guidToRefCount.Values.ToList();
     }
 
     private void CreateInstance(XmlNode node)

@@ -1,69 +1,55 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Frosty.Sdk.Interfaces;
 using Frosty.Sdk.IO;
 
 namespace Frosty.Sdk.Ebx;
 
+// ReSharper disable ClassWithVirtualMembersNeverInherited.Global
 public class EbxPartition
 {
-    public Guid PartitionGuid => partitionGuid;
-
-    public Guid PrimaryInstanceGuid
+    public EbxPartition()
     {
-        get
+    }
+
+    public EbxPartition(params IEbxInstance[] rootObjects)
+    {
+        // TODO: Null check decision pending on throw or ignore.
+        if (rootObjects is null)
         {
-            AssetClassGuid guid = PrimaryInstance.GetInstanceGuid();
-            return guid.ExportedGuid;
+            throw new NotImplementedException("TODO: Null check decision pending on throw or ignore.");
+        }
+
+        PartitionGuid = Guid.NewGuid();
+
+        foreach (IEbxInstance obj in rootObjects)
+        {
+            obj.SetInstanceGuid(new AssetClassGuid(Guid.NewGuid(), InternalInstances.Count));
+            InternalInstances.Add(obj);
         }
     }
 
-    public IEnumerable<Guid> Dependencies
-    {
-        get
-        {
-            foreach (Guid dependency in dependencies)
-            {
-                yield return dependency;
-            }
-        }
-    }
-    public IEnumerable<IEbxInstance> RootInstances => instances.Where((_, i) => refCounts[i] == 0 || i == 0);
+    public Guid PartitionGuid { get; internal set; }
 
-    public IEnumerable<IEbxInstance> Instances
-    {
-        get
-        {
-            foreach (IEbxInstance obj in instances)
-            {
-                yield return obj;
-            }
-        }
-    }
-    public IEnumerable<IEbxInstance> ExportedObjects
-    {
-        get
-        {
-            for (int i = 0; i < instances.Count; i++)
-            {
-                IEbxInstance obj = instances[i];
-                AssetClassGuid guid = obj.GetInstanceGuid();
-                if (guid.IsExported)
-                {
-                    yield return obj;
-                }
-            }
-        }
-    }
-    public IEbxInstance PrimaryInstance => instances[0];
+    public Guid PrimaryInstanceGuid => PrimaryInstance.GetInstanceGuid().ExportedGuid;
 
-    public bool IsValid => instances.Count != 0;
+    public IEnumerable<Guid> Dependencies => InternalDependencies;
 
-    internal Guid partitionGuid;
-    internal List<IEbxInstance> instances = new();
-    internal List<int> refCounts = new();
-    internal HashSet<Guid> dependencies = new();
+    public IEnumerable<IEbxInstance> RootInstances =>
+        InternalInstances.Where((_, i) => InternalRefCounts[i] == 0 || i == 0);
+
+    public IEnumerable<IEbxInstance> Instances => InternalInstances;
+
+    // TODO: Remove this resharper disable after something used this somewhere
+    // ReSharper disable MemberCanBePrivate.Global
+    public IEnumerable<IEbxInstance> ExportedObjects =>
+        InternalInstances.Where(obj => obj.GetInstanceGuid().IsExported);
+
+    public IEbxInstance PrimaryInstance => InternalInstances[0];
+
+    public bool IsValid => InternalInstances.Count != 0;
+
+    internal List<IEbxInstance> InternalInstances { get; set; } = [];
+    internal List<int> InternalRefCounts { get; set; } = [];
+    internal HashSet<Guid> InternalDependencies { get; set; } = [];
 
     public static EbxPartition Deserialize(DataStream ebxStream)
     {
@@ -77,73 +63,56 @@ public class EbxPartition
         writer.WritePartition(inPartition);
     }
 
-    public EbxPartition()
-    {
-    }
-
-    public EbxPartition(params IEbxInstance[] rootObjects)
-    {
-        partitionGuid = Guid.NewGuid();
-
-        foreach (IEbxInstance obj in rootObjects)
-        {
-            obj.SetInstanceGuid(new AssetClassGuid(Guid.NewGuid(), instances.Count));
-            instances.Add(obj);
-        }
-    }
-
     /// <summary>
-    /// Invoked when loading of the ebx asset has completed, to allow for any custom handling
+    ///     Invoked when loading of the ebx asset has completed, to allow for any custom handling
     /// </summary>
     public virtual void OnLoadComplete()
     {
     }
 
-    public IEbxInstance? GetObject(Guid guid)
+    // TODO: Change FirstOrDefault to SingleOrDefault if a duplicated object in ExportedObjects should cause a throw. Delete this comment after fix / not needed
+    public IEbxInstance? GetObject(Guid exportedGuid)
     {
-        foreach (IEbxInstance obj in ExportedObjects)
-        {
-            if (obj.GetInstanceGuid() == guid)
-            {
-                return obj;
-            }
-        }
-        return null;
+        return ExportedObjects.FirstOrDefault(obj => obj.GetInstanceGuid() == exportedGuid);
     }
 
-    public bool AddDependency(Guid guid)
+    public bool AddDependency(Guid dependencyGuid)
     {
-        if (!dependencies.Add(guid))
-        {
-            return false;
-        }
-
-        return true;
+        return InternalDependencies.Add(dependencyGuid);
     }
 
-    public void SetFileGuid(Guid guid) => partitionGuid = guid;
+    public void SetFileGuid(Guid fileGuid)
+    {
+        PartitionGuid = fileGuid;
+    }
 
     public void AddObject(IEbxInstance obj)
     {
+        // TODO: Null check decision pending on throw or ignore.
+        if (obj is null)
+        {
+            throw new NotImplementedException("TODO: Null check decision pending on throw or ignore.");
+        }
+
         AssetClassGuid guid = obj.GetInstanceGuid();
         if (guid.InternalId == -1)
         {
-            // make sure internal id is set before adding
-            guid = new AssetClassGuid(guid.ExportedGuid, instances.Count);
+            // Make sure internal ID is set before adding
+            guid = new AssetClassGuid(guid.ExportedGuid, InternalInstances.Count);
             obj.SetInstanceGuid(guid);
         }
 
-        instances.Add(obj);
+        InternalInstances.Add(obj);
     }
 
     public void RemoveObject(IEbxInstance obj)
     {
-        int idx = instances.IndexOf(obj);
+        int idx = InternalInstances.IndexOf(obj);
         if (idx == -1)
         {
             return;
         }
 
-        instances.RemoveAt(idx);
+        InternalInstances.RemoveAt(idx);
     }
 }

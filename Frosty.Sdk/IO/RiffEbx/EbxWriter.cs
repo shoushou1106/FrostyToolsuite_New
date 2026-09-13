@@ -536,8 +536,8 @@ public class EbxWriter : BaseEbxWriter
 
         ushort typeIdx;
 
-        TypeFlags typeFlags = typeRef.m_type!.GetFlags();
-        if (typeRef.m_type is not TypeInfoAsset &&
+        TypeFlags typeFlags = typeRef.InternalType!.GetFlags();
+        if (typeRef.InternalType is not TypeInfoAsset &&
             (typeRef.Type!.IsAssignableTo(typeof(IPrimitive)) || typeRef.Type == s_pointerType))
         {
             typeIdx = ushort.MaxValue;
@@ -546,11 +546,11 @@ public class EbxWriter : BaseEbxWriter
         }
         else
         {
-            typeIdx = (ushort)FindExistingType(typeRef.m_type!);
+            typeIdx = (ushort)FindExistingType(typeRef.InternalType!);
             if (typeIdx == ushort.MaxValue)
             {
                 // boxed value type refs shouldn't end up here, as they're already handled when processing classes
-                typeIdx = (ushort)AddType(typeRef.m_type!, inAddSignature);
+                typeIdx = (ushort)AddType(typeRef.InternalType!, inAddSignature);
             }
 
             writer.WriteUInt32((uint)(typeIdx << 2) | 2);

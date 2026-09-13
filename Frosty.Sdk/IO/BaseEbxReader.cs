@@ -64,10 +64,10 @@ public abstract class BaseEbxReader
             m_refCounts.RemoveAt(i);
         }
 
-        asset.partitionGuid = GetPartitionGuid();
-        asset.instances = m_instances!;
-        asset.refCounts = m_refCounts;
-        asset.dependencies = GetDependencies();
+        asset.PartitionGuid = GetPartitionGuid();
+        asset.InternalInstances = m_instances!;
+        asset.InternalRefCounts = m_refCounts;
+        asset.InternalDependencies = GetDependencies();
         asset.OnLoadComplete();
 
         return asset;

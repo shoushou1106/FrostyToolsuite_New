@@ -1,4 +1,3 @@
-using System;
 using Frosty.Sdk.Interfaces;
 using Frosty.Sdk.IO.Ebx;
 
@@ -24,11 +23,11 @@ public readonly struct PointerRef : IEquatable<PointerRef>
         Type = PointerRefType.External;
     }
 
-    public PointerRef(Guid guid)
+    public PointerRef(Guid partitionGuid)
     {
-        External = new EbxImportReference { PartitionGuid = guid, InstanceGuid = Guid.Empty };
+        External = new EbxImportReference { PartitionGuid = partitionGuid, InstanceGuid = Guid.Empty };
         Internal = null;
-        Type = (guid != Guid.Empty) ? PointerRefType.External : PointerRefType.Null;
+        Type = partitionGuid != Guid.Empty ? PointerRefType.External : PointerRefType.Null;
     }
 
     public PointerRef(IEbxInstance internalRef)
@@ -38,23 +37,34 @@ public readonly struct PointerRef : IEquatable<PointerRef>
         Type = PointerRefType.Internal;
     }
 
-    public static bool operator ==(PointerRef a, object b) => a.Equals(b);
+    public static bool operator ==(PointerRef a, PointerRef b)
+    {
+        return a.Equals(b);
+    }
 
-    public static bool operator !=(PointerRef a, object b) => !a.Equals(b);
+    public static bool operator !=(PointerRef a, PointerRef b)
+    {
+        return !a.Equals(b);
+    }
+
+    public static bool operator ==(PointerRef a, object? b)
+    {
+        return a.Equals(b);
+    }
+
+    public static bool operator !=(PointerRef a, object? b)
+    {
+        return !a.Equals(b);
+    }
 
     public override bool Equals(object? obj)
     {
-        if (obj is not PointerRef b)
-        {
-            return false;
-        }
-
-        return Equals(b);
+        return obj is PointerRef b && Equals(b);
     }
 
-    public bool Equals(PointerRef b)
+    public bool Equals(PointerRef other)
     {
-        return Type == b.Type && Internal == b.Internal && External == b.External;
+        return Type == other.Type && Internal == other.Internal && External == other.External;
     }
 
     public override int GetHashCode()
@@ -63,16 +73,12 @@ public readonly struct PointerRef : IEquatable<PointerRef>
         {
             int hash = (int)2166136261;
             hash = (hash * 16777619) ^ Type.GetHashCode();
-            if (Type == PointerRefType.Internal)
+            return Type switch
             {
-                hash = (hash * 16777619) ^ Internal!.GetHashCode();
-            }
-            else if (Type == PointerRefType.External)
-            {
-                hash = (hash * 16777619) ^ External.GetHashCode();
-            }
-
-            return hash;
+                PointerRefType.Internal => (hash * 16777619) ^ Internal!.GetHashCode(),
+                PointerRefType.External => (hash * 16777619) ^ External.GetHashCode(),
+                _ => hash
+            };
         }
     }
 }

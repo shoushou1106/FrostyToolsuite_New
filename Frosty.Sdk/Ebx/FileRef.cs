@@ -1,43 +1,52 @@
-using System;
-
 namespace Frosty.Sdk.Ebx;
 
-public readonly struct FileRef : IEquatable<FileRef>
+public readonly struct FileRef(string? value) : IEquatable<FileRef>
 {
-    private readonly string? m_fileName;
+    private readonly string? _fileName = value;
 
-    public FileRef(string value)
+    public static implicit operator string(FileRef value)
     {
-        m_fileName = value;
+        return value._fileName ?? string.Empty;
     }
 
-    public static implicit operator string(FileRef value) => value.m_fileName ?? string.Empty;
+    public static implicit operator FileRef(string? value)
+    {
+        return new FileRef(value);
+    }
 
-    public static implicit operator FileRef(string value) => new(value);
+    public static FileRef FromString(string? value)
+    {
+        return new FileRef(value);
+    }
 
-    public override string ToString() => $"FileRef '{m_fileName ?? "null"}'";
+    public override string ToString()
+    {
+        return $"FileRef '{_fileName ?? "null"}'";
+    }
 
     public override bool Equals(object? obj)
     {
-        if (obj is not FileRef b)
-        {
-            return false;
-        }
-
-        return Equals(b);
+        return obj is FileRef b && Equals(b);
     }
 
-    public bool Equals(FileRef b)
+    public bool Equals(FileRef other)
     {
-        return m_fileName == b.m_fileName;
+        return _fileName == other._fileName;
     }
 
-    public static bool operator ==(FileRef a, object b) => a.Equals(b);
+    public static bool operator ==(FileRef a, object? b)
+    {
+        return a.Equals(b);
+    }
 
-    public static bool operator !=(FileRef a, object b) => !a.Equals(b);
+    public static bool operator !=(FileRef a, object? b)
+    {
+        return !a.Equals(b);
+    }
 
     public override int GetHashCode()
     {
-        return m_fileName?.GetHashCode() ?? 0;
+        // TODO: Specific exact StringComparison type. The InvariantCulture is a safe placeholder.
+        return _fileName?.GetHashCode(StringComparison.InvariantCulture) ?? 0;
     }
 }

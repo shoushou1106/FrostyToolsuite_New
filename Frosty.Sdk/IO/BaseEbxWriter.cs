@@ -53,9 +53,9 @@ public abstract class BaseEbxWriter
     public void WritePartition(EbxPartition inPartition)
     {
         List<IEbxInstance> exportedInstances = new(1);
-        List<IEbxInstance> internalInstances = new(inPartition.instances.Count);
+        List<IEbxInstance> internalInstances = new(inPartition.InternalInstances.Count);
 
-        foreach (IEbxInstance instance in inPartition.instances)
+        foreach (IEbxInstance instance in inPartition.InternalInstances)
         {
         	if (instance.GetInstanceGuid().IsExported)
         	{

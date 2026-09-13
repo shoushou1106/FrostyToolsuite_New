@@ -716,7 +716,7 @@ public sealed class DbxWriter : IDisposable
 
         WritePartitionStart(inPartition.PartitionGuid, inPartition.PrimaryInstanceGuid);
 
-        foreach (object ebxObj in inPartition.instances)
+        foreach (object ebxObj in inPartition.InternalInstances)
         {
             WriteInstance(ebxObj);
         }
